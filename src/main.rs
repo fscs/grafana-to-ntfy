@@ -38,12 +38,7 @@ async fn index(data: Json<data::Notification>, bauth: bauth::BAuth, client: &Sta
     //   ^2 - https://grafana.com/docs/grafana/latest/alerting/old-alerting/notifications/#webhook
     //   ^3 - https://ntfy.sh/docs/publish/#tags-emojis
     //   ^4 - https://ntfy.sh/docs/emojis
-    //
-    let tags_header = match data.status.as_str() {
-        "alerting" | "firing" => format!("{}, {}", "warning", &data.status),
-        "ok" | "resolved" => format!("{}, {}", "white_check_mark", &data.status),
-        _ => data.status.to_string(),
-    };
+    
 
     let req_client = client.post(NTFY_URL.clone());
     let req_client = match NTFY_BAUTH_PASS.clone().is_empty() {
@@ -53,7 +48,6 @@ async fn index(data: Json<data::Notification>, bauth: bauth::BAuth, client: &Sta
 
     let result = req_client
         .body(data.message.clone().unwrap_or_default())
-        .header("X-Tags", &tags_header)
         .header("X-Title", &data.title)
         .header("X-Priority", &data.get_priority())
         .send()
